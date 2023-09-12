@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Info</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="index.html">Index</a></li>
+        <li><a href="info.html">Info</a></li>
+      </ul>
+    </nav>
+
+    <div class="form-container">
+      <form accept="info.html" method="post" enctype="multipart/form-data">
+        <p id="error"></p>
+        <div class="input-box">
+          <div class="label">
+          <label for="name">Name</label><span id="errname"></span>
+        </div>
+          <input
+            type="text"
+            id="name"
+            placeholder="Enter Name"
+            onchange="changeData('name')"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <div class="label">
+          <label for="aadhar">Aadhar</label><span id="erraadhar"></span>
+        </div>
+          <input
+            type="text"
+            id="aadhar"
+            placeholder="e.g 1234 5678 9101"
+            required
+            onchange="changeData('aadhar')"
+          />
+        </div>
+
+        <div class="input-box">
+          <div class="label">
+          <label for="PAN">PAN</label><span id="errPAN"></span>
+        </div>
+          <input
+            type="text"
+            id="PAN"
+            placeholder="e.g AAAAA1234A"
+            required
+            onchange="changeData('PAN')"
+          />
+        </div>
+
+        <div class="input-box">
+          <div class="label">
+          <label for="email">Email</label><span id="erremail"></span>
+        </div>
+          <input
+            type="email"
+            id="email"
+            placeholder="example@email.com"
+            required
+            onchange="changeData('email')"
+          />
+        </div>
+
+        <div class="input-box">
+          <div class="label">
+          <label for="mno">Mobile No.</label><span id="errmno"></span>
+        </div>
+          <input
+            type="tel"
+            id="mno"
+            placeholder="9876543210"
+            minlength="10"
+            maxlength="10"
+            onchange="changeData('mno')"
+            required
+          />
+        </div>
+
+        <div class="input-box">
+          <div class="imgDiv">
+            <label for="profileImg">Upload Profile Picture</label>
+            <input
+              type="file"
+              id="profileImg"
+              name="profileImg"
+              accept="image/*"
+              onchange="handleImg(event)"
+              required
+            />
+          </div>
+        </div>
+
+        <div id="imgDiv"></div>
+
+        <input
+          type="button"
+          value="Submit"
+          class="btn"
+          onclick="submitData()"
+        />
+      </form>
+    </div>
+
+    <!-- <script>
+      function changeData(id) {
+        let field = document.getElementById(id).value;
+
+        localStorage.setItem(id, field);
+      }
+
+      //display img
+      const imageInput = document.getElementById("img");
+
+      imageInput.addEventListener("change", (event) => {
+        // 👇️ Save the image to localStorage
+        const image = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.addEventListener("load", () => {
+          localStorage.setItem("img", reader.result);
+        });
+
+        if (image) {
+          reader.readAsDataURL(image);
+        }
+      });
+
+      //
+    </script> -->
+
+    <script>
+      let data = {};
+      let imageArray = [];
+
+      
+
+      function submitData() {
+        for (let key in data) {
+          localStorage.setItem(key, data[key]);
+        }
+
+        localStorage.setItem("profileImages", JSON.stringify(imageArray));
+        window.location.href = "info.html"; // Redirect to the preview page
+      }
+
+      function changeData(id) {
+        const err = document.getElementById(`err${id}`);
+        let field = document.getElementById(id).value;
+        //let a = document.getElementById("error");
+        if (id == "mno" || id == "aadhar" || id == "PAN") {
+          if (id == "mno") {
+            if (field.length != 10) {
+              err.innerText = "Mobile No. should be 10 digits";
+            } else if (!/^[6-9]\d{9}$/.test(field)) {
+              err.innerText = "please check the  Phone number again";
+            } else err.innerText = "";
+          }
+          if (id == "aadhar") {
+            if (field.length != 12) {
+              err.innerText = "Aadhar should be 12 digits";
+            } else if (!/^\d{12}$/.test(field)) {
+              err.innerText = "please check the Aadhar";
+            } else err.innerText = "";
+          }
+          if (id == "PAN") {
+            if (field.length != 10) {
+              err.innerText = "PAN should be AAAAA1234A in this format";
+            } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(field)) {
+              err.innerText = "please check the Pan card";
+            } else err.innerText = "";
+          }
+        } else if (["name", "email"].includes(id)) {
+          if (id == "name") {
+            field = field.trim();
+            if (field.length < 4) return (err.innerText = "Name is too short");
+            if (!/^[A-Za-z ]{4,}$/.test(field))
+              return (err.innerText = "please check the name again");
+            else err.innerText = "";
+          }
+          if (id == "email") {
+            if (
+              !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
+                field
+              )
+            )
+              return (err.innerText = "Provide the valid email");
+            else err.innerText = "";
+          }
+        }
+        data[id] = field;
+      }
+
+      function removeImage(index) {
+        imageArray.splice(index, 1); // Remove the selected image from the array
+        renderImages(imageArray); // Re-render the remaining images
+        document.getElementById(`err${id}`).innerText = ""; // Clear any error message
+      }
+
+      function handleImg(e) {
+        console.log(e);
+        const imageFiles = e.target.files;
+
+        for (let i = 0; i < imageFiles.length; i++) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const imageDataURL = e.target.result;
+            console.log(imageDataURL);
+            imageArray.push(imageDataURL);
+            console.log(imageArray);
+            renderImages(imageArray);
+          };
+          reader.readAsDataURL(imageFiles[i]);
+        }
+      }
+
+      function renderImages(images) {
+        const imgDiv = document.getElementById("imgDiv");
+        imgDiv.innerHTML = "";
+
+        images.forEach((imgData, index) => {
+          const imgContainer = document.createElement("div");
+          imgContainer.classList.add("image-container"); // Add a class for styling
+
+          const img = document.createElement("img");
+          img.src = imgData;
+          img.alt = `Image ${index + 1}`;
+          imgContainer.appendChild(img);
+
+          const removeBtn = document.createElement("button");
+          removeBtn.classList.add("remove-button"); // Add a class for styling
+          removeBtn.innerHTML = "&#10006;"; // Unicode "X" character
+          removeBtn.onclick = () => removeImage(index);
+
+          imgContainer.appendChild(removeBtn);
+
+          imgDiv.appendChild(imgContainer);
+        });
+      }
+    </script>
+  </body>
+</html>
